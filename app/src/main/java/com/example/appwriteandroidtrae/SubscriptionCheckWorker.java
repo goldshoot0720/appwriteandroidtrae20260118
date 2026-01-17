@@ -14,7 +14,10 @@ import androidx.core.content.ContextCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SubscriptionCheckWorker extends Worker {
 
@@ -61,7 +64,14 @@ public class SubscriptionCheckWorker extends Worker {
         createNotificationChannel();
 
         String title = "訂閱即將到期";
-        String content = item.name + " 將在三天內到期";
+        String content;
+        if (item.nextDateMillis > 0L) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String dateText = format.format(new Date(item.nextDateMillis));
+            content = item.name + " 將在 " + dateText + " 扣款";
+        } else {
+            content = item.name + " 將在三天內到期";
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -88,4 +98,3 @@ public class SubscriptionCheckWorker extends Worker {
         }
     }
 }
-

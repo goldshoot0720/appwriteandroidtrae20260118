@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ListView listView;
     private TextView textViewError;
-    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<AppwriteHelper.SubscriptionItem> adapter;
+    private final List<AppwriteHelper.SubscriptionItem> subscriptionItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +60,7 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listViewSubscriptions);
         textViewError = findViewById(R.id.textViewError);
 
-        List<String> items = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
+        adapter = new SubscriptionAdapter(this, subscriptionItems);
         listView.setAdapter(adapter);
 
         createNotificationChannel();
@@ -80,36 +80,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(List<AppwriteHelper.SubscriptionItem> result) {
                         runOnUiThread(() -> {
                             progressBar.setVisibility(View.GONE);
-                            List<String> display = new ArrayList<>();
-                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                            for (AppwriteHelper.SubscriptionItem item : result) {
-                                StringBuilder builder = new StringBuilder();
-                                builder.append(item.name);
-                                if (item.site != null && !item.site.isEmpty()) {
-                                    builder.append(" ");
-                                    builder.append(item.site);
-                                }
-                                if (item.price >= 0) {
-                                    builder.append(" 價格: ");
-                                    builder.append(item.price);
-                                }
-                                if (item.account != null && !item.account.isEmpty()) {
-                                    builder.append(" 帳號: ");
-                                    builder.append(item.account);
-                                }
-                                if (item.nextDateMillis > 0L) {
-                                    String dateText = format.format(new Date(item.nextDateMillis));
-                                    builder.append(" 下次扣款日: ");
-                                    builder.append(dateText);
-                                }
-                                if (item.note != null && !item.note.isEmpty()) {
-                                    builder.append(" 備註: ");
-                                    builder.append(item.note);
-                                }
-                                display.add(builder.toString());
-                            }
-                            adapter.clear();
-                            adapter.addAll(display);
+                            subscriptionItems.clear();
+                            subscriptionItems.addAll(result);
                             adapter.notifyDataSetChanged();
                             checkExpiringSubscriptions(result);
                         });
@@ -182,6 +154,72 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    private static class SubscriptionAdapter extends ArrayAdapter<AppwriteHelper.SubscriptionItem> {
+
+        private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        SubscriptionAdapter(android.content.Context context, List<AppwriteHelper.SubscriptionItem> items) {
+            super(context, 0, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, android.view.ViewGroup parent) {
+            if (convertView == null) {
+                convertView = android.view.LayoutInflater.from(getContext()).inflate(R.layout.item_subscription, parent, false);
+            }
+            AppwriteHelper.SubscriptionItem item = getItem(position);
+            TextView textTitle = convertView.findViewById(R.id.textTitle);
+            TextView textSubtitle = convertView.findViewById(R.id.textSubtitle);
+            TextView textPrice = convertView.findViewById(R.id.textPrice);
+            TextView textAccount = convertView.findViewById(R.id.textAccount);
+            TextView textNextDate = convertView.findViewById(R.id.textNextDate);
+            TextView textNote = convertView.findViewById(R.id.textNote);
+
+            if (item != null) {
+                String title = item.name != null ? item.name : "";
+                textTitle.setText(title);
+
+                if (item.site != null && !item.site.isEmpty()) {
+                    textSubtitle.setVisibility(View.VISIBLE);
+                    textSubtitle.setText(item.site);
+                } else {
+                    textSubtitle.setVisibility(View.GONE);
+                }
+
+                if (item.price >= 0) {
+                    textPrice.setVisibility(View.VISIBLE);
+                    textPrice.setText("價格: " + item.price);
+                } else {
+                    textPrice.setVisibility(View.GONE);
+                }
+
+                if (item.account != null && !item.account.isEmpty()) {
+                    textAccount.setVisibility(View.VISIBLE);
+                    textAccount.setText("帳號: " + item.account);
+                } else {
+                    textAccount.setVisibility(View.GONE);
+                }
+
+                if (item.nextDateMillis > 0L) {
+                    textNextDate.setVisibility(View.VISIBLE);
+                    String dateText = dateFormat.format(new Date(item.nextDateMillis));
+                    textNextDate.setText("下次扣款日: " + dateText);
+                } else {
+                    textNextDate.setVisibility(View.GONE);
+                }
+
+                if (item.note != null && !item.note.isEmpty()) {
+                    textNote.setVisibility(View.VISIBLE);
+                    textNote.setText(item.note);
+                } else {
+                    textNote.setVisibility(View.GONE);
+                }
+            }
+
+            return convertView;
+        }
+    }
+
     private void checkExpiringSubscriptions(List<AppwriteHelper.SubscriptionItem> items) {
         long now = System.currentTimeMillis();
         long threeDaysMillis = 3L * 24L * 60L * 60L * 1000L;
@@ -204,7 +242,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String title = "訂閱即將到期";
-        String content = item.name + " 將在三天內到期";
+        String content;
+        if (item.nextDateMillis > 0L) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String dateText = format.format(new Date(item.nextDateMillis));
+            content = item.name + " 將在 " + dateText + " 扣款";
+        } else {
+            content = item.name + " 將在三天內到期";
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
