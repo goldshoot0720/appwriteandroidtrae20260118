@@ -22,11 +22,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
         ensureNotificationPermission();
+        scheduleDailySubscriptionCheck();
 
         loadSubscriptions();
     }
@@ -144,6 +151,35 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
         }
+    }
+
+    private void scheduleDailySubscriptionCheck() {
+        long now = System.currentTimeMillis();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+        calendar.set(Calendar.HOUR_OF_DAY, 6);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long firstRun = calendar.getTimeInMillis();
+        if (firstRun <= now) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            firstRun = calendar.getTimeInMillis();
+        }
+        long initialDelay = firstRun - now;
+
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                SubscriptionCheckWorker.class,
+                24, TimeUnit.HOURS
+        )
+                .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+                .build();
+
+        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(
+                "subscription_check",
+                ExistingPeriodicWorkPolicy.KEEP,
+                request
+        );
     }
 
     private void checkExpiringSubscriptions(List<AppwriteHelper.SubscriptionItem> items) {

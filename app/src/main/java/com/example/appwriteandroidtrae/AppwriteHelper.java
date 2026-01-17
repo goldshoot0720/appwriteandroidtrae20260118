@@ -76,45 +76,55 @@ public class AppwriteHelper {
 
     public void listSubscriptions(final DataCallback<List<SubscriptionItem>> callback) {
         new Thread(() -> {
-            HttpURLConnection connection = null;
             try {
-                String path = "/databases/" + APPWRITE_DATABASE_ID
-                        + "/collections/" + APPWRITE_SUBSCRIPTION_COLLECTION_ID
-                        + "/documents";
-                URL url = new URL(APPWRITE_ENDPOINT + path);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("X-Appwrite-Project", APPWRITE_PROJECT_ID);
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
-
-                int statusCode = connection.getResponseCode();
-                InputStream stream = statusCode >= 200 && statusCode < 300
-                        ? connection.getInputStream()
-                        : connection.getErrorStream();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuilder responseBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    responseBuilder.append(line);
-                }
-                reader.close();
-
-                if (statusCode >= 200 && statusCode < 300) {
-                    List<SubscriptionItem> items = parseDocuments(responseBuilder.toString());
-                    callback.onSuccess(items);
-                } else {
-                    callback.onError(new Exception("HTTP " + statusCode + ": " + responseBuilder));
-                }
+                List<SubscriptionItem> items = fetchSubscriptions();
+                callback.onSuccess(items);
             } catch (Exception e) {
                 callback.onError(e);
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
             }
         }).start();
+    }
+
+    public List<SubscriptionItem> listSubscriptionsSync() throws Exception {
+        return fetchSubscriptions();
+    }
+
+    private List<SubscriptionItem> fetchSubscriptions() throws Exception {
+        HttpURLConnection connection = null;
+        try {
+            String path = "/databases/" + APPWRITE_DATABASE_ID
+                    + "/collections/" + APPWRITE_SUBSCRIPTION_COLLECTION_ID
+                    + "/documents";
+            URL url = new URL(APPWRITE_ENDPOINT + path);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("X-Appwrite-Project", APPWRITE_PROJECT_ID);
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(15000);
+
+            int statusCode = connection.getResponseCode();
+            InputStream stream = statusCode >= 200 && statusCode < 300
+                    ? connection.getInputStream()
+                    : connection.getErrorStream();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder responseBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                responseBuilder.append(line);
+            }
+            reader.close();
+
+            if (statusCode >= 200 && statusCode < 300) {
+                return parseDocuments(responseBuilder.toString());
+            } else {
+                throw new Exception("HTTP " + statusCode + ": " + responseBuilder);
+            }
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     private List<SubscriptionItem> parseDocuments(String json) throws JSONException {
