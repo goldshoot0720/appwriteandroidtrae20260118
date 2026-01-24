@@ -25,6 +25,18 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".BankStatsActivity"
+            android:exported="false"
+            android:label="銀行統計"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SubscriptionActivity"
+            android:exported="false"
+            android:label="訂閱管理"
+            android:parentActivityName=".MainActivity" />
+
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"

@@ -24,6 +24,7 @@ public class AppwriteHelper {
     private static final String APPWRITE_PROJECT_ID = "680c76af0037a7d23e44";
     private static final String APPWRITE_DATABASE_ID = "680c778b000f055f6409";
     private static final String APPWRITE_SUBSCRIPTION_COLLECTION_ID = "687250d70020221fb26c";
+    private static final String APPWRITE_BANK_COLLECTION_ID = "6875df530018459b05b6";
 
     private static AppwriteHelper instance;
 
@@ -35,13 +36,14 @@ public class AppwriteHelper {
         void onError(Exception error);
     }
 
-    public static class SubscriptionItem {
+    public static class SubscriptionItem implements java.io.Serializable {
         public final String id;
         public final String name;
         public final String site;
         public final int price;
         public final String note;
         public final String account;
+        public final String bank;
         public final long nextDateMillis;
 
         public SubscriptionItem(
@@ -51,6 +53,7 @@ public class AppwriteHelper {
                 int price,
                 String note,
                 String account,
+                String bank,
                 long nextDateMillis
         ) {
             this.id = id;
@@ -59,7 +62,45 @@ public class AppwriteHelper {
             this.price = price;
             this.note = note;
             this.account = account;
+            this.bank = bank;
             this.nextDateMillis = nextDateMillis;
+        }
+    }
+
+    public static class BankItem implements java.io.Serializable {
+        public final String id;
+        public final String name;
+        public final int deposit;
+        public final String site;
+        public final String address;
+        public final int withdrawals;
+        public final int transfer;
+        public final String activity;
+        public final String card;
+        public final String account;
+
+        public BankItem(
+                String id,
+                String name,
+                int deposit,
+                String site,
+                String address,
+                int withdrawals,
+                int transfer,
+                String activity,
+                String card,
+                String account
+        ) {
+            this.id = id;
+            this.name = name;
+            this.deposit = deposit;
+            this.site = site;
+            this.address = address;
+            this.withdrawals = withdrawals;
+            this.transfer = transfer;
+            this.activity = activity;
+            this.card = card;
+            this.account = account;
         }
     }
 
@@ -85,15 +126,38 @@ public class AppwriteHelper {
         }).start();
     }
 
+    public void listBanks(final DataCallback<List<BankItem>> callback) {
+        new Thread(() -> {
+            try {
+                List<BankItem> items = fetchBanks();
+                callback.onSuccess(items);
+            } catch (Exception e) {
+                callback.onError(e);
+            }
+        }).start();
+    }
+
     public List<SubscriptionItem> listSubscriptionsSync() throws Exception {
         return fetchSubscriptions();
     }
 
     private List<SubscriptionItem> fetchSubscriptions() throws Exception {
+        return fetchData(APPWRITE_SUBSCRIPTION_COLLECTION_ID, this::parseDocuments);
+    }
+
+    private List<BankItem> fetchBanks() throws Exception {
+        return fetchData(APPWRITE_BANK_COLLECTION_ID, this::parseBanks);
+    }
+
+    private interface Parser<T> {
+        List<T> parse(String json) throws JSONException;
+    }
+
+    private <T> List<T> fetchData(String collectionId, Parser<T> parser) throws Exception {
         HttpURLConnection connection = null;
         try {
             String path = "/databases/" + APPWRITE_DATABASE_ID
-                    + "/collections/" + APPWRITE_SUBSCRIPTION_COLLECTION_ID
+                    + "/collections/" + collectionId
                     + "/documents";
             URL url = new URL(APPWRITE_ENDPOINT + path);
             connection = (HttpURLConnection) url.openConnection();
@@ -116,7 +180,7 @@ public class AppwriteHelper {
             reader.close();
 
             if (statusCode >= 200 && statusCode < 300) {
-                return parseDocuments(responseBuilder.toString());
+                return parser.parse(responseBuilder.toString());
             } else {
                 throw new Exception("HTTP " + statusCode + ": " + responseBuilder);
             }
@@ -142,8 +206,34 @@ public class AppwriteHelper {
             int price = document.has("price") ? document.optInt("price", -1) : -1;
             String note = document.optString("note", "");
             String account = document.optString("account", "");
+            String bank = document.optString("bank", "");
             long nextDate = extractNextDate(document);
-            items.add(new SubscriptionItem(id, name, site, price, note, account, nextDate));
+            items.add(new SubscriptionItem(id, name, site, price, note, account, bank, nextDate));
+        }
+        return items;
+    }
+
+    private List<BankItem> parseBanks(String json) throws JSONException {
+        List<BankItem> items = new ArrayList<>();
+        JSONObject root = new JSONObject(json);
+        JSONArray documents = root.optJSONArray("documents");
+        if (documents == null) {
+            return items;
+        }
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document = documents.getJSONObject(i);
+            String id = document.optString("$id");
+            String name = extractName(document, id);
+            int deposit = document.optInt("deposit", 0);
+            String site = document.optString("site", "");
+            String address = document.optString("address", "");
+            int withdrawals = document.optInt("withdrawals", 0);
+            int transfer = document.optInt("transfer", 0);
+            String activity = document.optString("activity", "");
+            String card = document.optString("card", "");
+            String account = document.optString("account", "");
+
+            items.add(new BankItem(id, name, deposit, site, address, withdrawals, transfer, activity, card, account));
         }
         return items;
     }
