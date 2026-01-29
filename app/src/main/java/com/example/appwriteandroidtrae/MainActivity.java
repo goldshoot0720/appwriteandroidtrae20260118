@@ -46,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         // Setup cards
         View cardSubscription = findViewById(R.id.cardSubscription);
         View cardBankStats = findViewById(R.id.cardBankStats);
+        View cardFoodManagement = findViewById(R.id.cardFoodManagement);
+        View cardFengNotes = findViewById(R.id.cardFengNotes);
+        View cardFengCommon = findViewById(R.id.cardFengCommon);
 
         cardSubscription.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, SubscriptionActivity.class);
@@ -54,6 +57,21 @@ public class MainActivity extends AppCompatActivity {
 
         cardBankStats.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, BankStatsActivity.class);
+            startActivity(intent);
+        });
+
+        cardFoodManagement.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FoodManagementActivity.class);
+            startActivity(intent);
+        });
+
+        cardFengNotes.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FengNotesActivity.class);
+            startActivity(intent);
+        });
+
+        cardFengCommon.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FengCommonActivity.class);
             startActivity(intent);
         });
 

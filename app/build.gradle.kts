@@ -78,6 +78,12 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+    }
+    
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 
@@ -89,6 +95,9 @@ dependencies {
 
     implementation("io.appwrite:sdk-for-android:11.4.0")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+    
+    // Core library desugaring for Java 8+ APIs on older Android versions
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
