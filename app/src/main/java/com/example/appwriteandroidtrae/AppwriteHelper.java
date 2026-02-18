@@ -63,8 +63,7 @@ public class AppwriteHelper {
                 boolean continueFlag,
                 long nextDateMillis,
                 long createdAtMillis,
-                long updatedAtMillis
-        ) {
+                long updatedAtMillis) {
             this.id = id;
             this.name = name;
             this.site = site;
@@ -105,8 +104,7 @@ public class AppwriteHelper {
                 String card,
                 String account,
                 long createdAtMillis,
-                long updatedAtMillis
-        ) {
+                long updatedAtMillis) {
             this.id = id;
             this.name = name;
             this.deposit = deposit;
@@ -164,8 +162,7 @@ public class AppwriteHelper {
                 String file3name,
                 String file3type,
                 long createdAtMillis,
-                long updatedAtMillis
-        ) {
+                long updatedAtMillis) {
             this.id = id;
             this.title = title;
             this.content = content;
@@ -211,8 +208,7 @@ public class AppwriteHelper {
                 String photo,
                 String photohash,
                 long createdAtMillis,
-                long updatedAtMillis
-        ) {
+                long updatedAtMillis) {
             this.id = id;
             this.name = name;
             this.amount = amount;
@@ -250,8 +246,7 @@ public class AppwriteHelper {
                 String hash,
                 String cover,
                 long createdAtMillis,
-                long updatedAtMillis
-        ) {
+                long updatedAtMillis) {
             this.id = id;
             this.name = name;
             this.file = file;
@@ -360,21 +355,30 @@ public class AppwriteHelper {
         List<T> parse(String json) throws JSONException;
     }
 
-    private static final int PAGE_LIMIT = 100;
+    private static final int PAGE_LIMIT = 25;
 
     private <T> List<T> fetchData(String collectionId, Parser<T> parser) throws Exception {
         List<T> allItems = new ArrayList<>();
-        int offset = 0;
+        String lastDocId = null;
+        int total = -1;
+        int maxPages = 50; // 安全上限，防止無限迴圈
 
-        while (true) {
-            String path = "/databases/" + APPWRITE_DATABASE_ID
-                    + "/collections/" + collectionId
-                    + "/documents?limit=" + PAGE_LIMIT + "&offset=" + offset;
+        for (int page = 0; page < maxPages; page++) {
+            StringBuilder pathBuilder = new StringBuilder();
+            pathBuilder.append("/databases/").append(APPWRITE_DATABASE_ID)
+                    .append("/collections/").append(collectionId)
+                    .append("/documents?limit=").append(PAGE_LIMIT);
+
+            // 使用 cursorAfter 進行游標分頁（Appwrite 匿名存取不支援 offset）
+            if (lastDocId != null) {
+                pathBuilder.append("&queries%5B0%5D=cursorAfter(%22")
+                        .append(lastDocId).append("%22)");
+            }
 
             HttpURLConnection connection = null;
             String responseStr;
             try {
-                URL url = new URL(APPWRITE_ENDPOINT + path);
+                URL url = new URL(APPWRITE_ENDPOINT + pathBuilder.toString());
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("X-Appwrite-Project", APPWRITE_PROJECT_ID);
@@ -404,14 +408,25 @@ public class AppwriteHelper {
                 }
             }
 
+            // 解析 total 和 documents
+            JSONObject root = new JSONObject(responseStr);
+            if (total < 0) {
+                total = root.optInt("total", 0);
+            }
+
+            // 取得最後一筆文件的 $id 作為下一頁游標
+            JSONArray documents = root.optJSONArray("documents");
+            if (documents != null && documents.length() > 0) {
+                lastDocId = documents.getJSONObject(documents.length() - 1).optString("$id");
+            }
+
             List<T> pageItems = parser.parse(responseStr);
             allItems.addAll(pageItems);
 
-            // 如果回傳數量少於 PAGE_LIMIT，代表已取完所有資料
-            if (pageItems.size() < PAGE_LIMIT) {
+            // 已取得所有資料 或 本頁為空
+            if (allItems.size() >= total || pageItems.isEmpty()) {
                 break;
             }
-            offset += PAGE_LIMIT;
         }
 
         return allItems;
@@ -437,7 +452,8 @@ public class AppwriteHelper {
             long nextDate = extractNextDate(document);
             long createdAtMillis = extractDateField(document, "$createdAt");
             long updatedAtMillis = extractDateField(document, "$updatedAt");
-            items.add(new SubscriptionItem(id, name, site, price, note, account, currency, continueFlag, nextDate, createdAtMillis, updatedAtMillis));
+            items.add(new SubscriptionItem(id, name, site, price, note, account, currency, continueFlag, nextDate,
+                    createdAtMillis, updatedAtMillis));
         }
         return items;
     }
@@ -465,7 +481,8 @@ public class AppwriteHelper {
             long createdAtMillis = extractDateField(document, "$createdAt");
             long updatedAtMillis = extractDateField(document, "$updatedAt");
 
-            items.add(new BankItem(id, name, deposit, site, address, withdrawals, transfer, activity, card, account, createdAtMillis, updatedAtMillis));
+            items.add(new BankItem(id, name, deposit, site, address, withdrawals, transfer, activity, card, account,
+                    createdAtMillis, updatedAtMillis));
         }
         return items;
     }
@@ -501,11 +518,10 @@ public class AppwriteHelper {
             long updatedAtMillis = extractDateField(document, "$updatedAt");
 
             items.add(new ArticleItem(
-                id, title, content, category, ref, newDateMillis,
-                url1, url2, url3,
-                file1, file1name, file1type, file2, file2name, file2type, file3, file3name, file3type,
-                createdAtMillis, updatedAtMillis
-            ));
+                    id, title, content, category, ref, newDateMillis,
+                    url1, url2, url3,
+                    file1, file1name, file1type, file2, file2name, file2type, file3, file3name, file3type,
+                    createdAtMillis, updatedAtMillis));
         }
         return items;
     }
@@ -531,9 +547,8 @@ public class AppwriteHelper {
             long updatedAtMillis = extractDateField(document, "$updatedAt");
 
             items.add(new FoodItem(
-                id, name, amount, price, shop, todateMillis,
-                photo, photohash, createdAtMillis, updatedAtMillis
-            ));
+                    id, name, amount, price, shop, todateMillis,
+                    photo, photohash, createdAtMillis, updatedAtMillis));
         }
         return items;
     }
@@ -559,7 +574,8 @@ public class AppwriteHelper {
             long createdAtMillis = extractDateField(document, "$createdAt");
             long updatedAtMillis = extractDateField(document, "$updatedAt");
 
-            items.add(new CommonAccountItem(id, name, file, filetype, note, ref, category, hash, cover, createdAtMillis, updatedAtMillis));
+            items.add(new CommonAccountItem(id, name, file, filetype, note, ref, category, hash, cover, createdAtMillis,
+                    updatedAtMillis));
         }
         return items;
     }
