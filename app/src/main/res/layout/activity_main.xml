@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F5F5F5"
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -12,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="@color/purple_500"
+        android:background="@drawable/gradient_toolbar"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:titleTextColor="@android:color/white"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -34,94 +35,269 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- 訂閱管理 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubscription"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <TextView
+                app:cardElevation="6dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="訂閱管理"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_subscription"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📋"
+                        android:textSize="36sp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="訂閱管理"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="管理所有訂閱服務與扣款提醒"
+                            android:textSize="13sp"
+                            android:textColor="#DDFFFFFF"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="28sp"
+                        android:textColor="#88FFFFFF" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 銀行統計 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardBankStats"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <TextView
+                app:cardElevation="6dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="銀行統計"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_bank"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏦"
+                        android:textSize="36sp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="銀行統計"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="查看銀行存款與帳戶總覽"
+                            android:textSize="13sp"
+                            android:textColor="#DDFFFFFF"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="28sp"
+                        android:textColor="#88FFFFFF" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 食物管理 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFoodManagement"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <TextView
+                app:cardElevation="6dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="食物管理"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_food"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🍔"
+                        android:textSize="36sp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="食物管理"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="記錄食材庫存與購買紀錄"
+                            android:textSize="13sp"
+                            android:textColor="#DDFFFFFF"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="28sp"
+                        android:textColor="#88FFFFFF" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 鋒兄筆記 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFengNotes"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <TextView
+                app:cardElevation="6dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="鋒兄筆記"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_notes"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📝"
+                        android:textSize="36sp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="鋒兄筆記"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="瀏覽分類文章與筆記"
+                            android:textSize="13sp"
+                            android:textColor="#DDFFFFFF"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="28sp"
+                        android:textColor="#88FFFFFF" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 鋒兄常用 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFengCommon"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <TextView
+                app:cardElevation="6dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="鋒兄常用"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_common"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐"
+                        android:textSize="36sp" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="鋒兄常用"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="常用帳號與服務快速存取"
+                            android:textSize="13sp"
+                            android:textColor="#DDFFFFFF"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="28sp"
+                        android:textColor="#88FFFFFF" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
