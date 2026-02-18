@@ -48,9 +48,6 @@ public class SubscriptionCheckWorker extends Worker {
             if (item.nextDateMillis <= 0L) {
                 continue;
             }
-            if (!item.continueFlag) {
-                continue;
-            }
             if (item.nextDateMillis >= now && item.nextDateMillis <= now + threeDaysMillis) {
                 long daysLeft = TimeUnit.MILLISECONDS.toDays(item.nextDateMillis - now);
                 showExpiryNotification(item, daysLeft);
@@ -60,8 +57,8 @@ public class SubscriptionCheckWorker extends Worker {
 
     private void showExpiryNotification(AppwriteHelper.SubscriptionItem item, long daysLeft) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
         }
@@ -106,7 +103,8 @@ public class SubscriptionCheckWorker extends Worker {
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
-            NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager manager = (NotificationManager) getApplicationContext()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
             }
