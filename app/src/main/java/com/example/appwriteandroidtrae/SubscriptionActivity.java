@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +85,13 @@ public class SubscriptionActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             subscriptionItems.clear();
                             subscriptionItems.addAll(result);
+                            Collections.sort(subscriptionItems, (a, b) -> {
+                                // 有日期的排前面，無日期的排最後
+                                if (a.nextDateMillis <= 0 && b.nextDateMillis <= 0) return 0;
+                                if (a.nextDateMillis <= 0) return 1;
+                                if (b.nextDateMillis <= 0) return -1;
+                                return Long.compare(a.nextDateMillis, b.nextDateMillis);
+                            });
                             adapter.notifyDataSetChanged();
                             checkExpiringSubscriptions(result);
                         });
