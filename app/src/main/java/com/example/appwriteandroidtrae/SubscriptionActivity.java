@@ -83,6 +83,16 @@ public class SubscriptionActivity extends AppCompatActivity {
         return true;
     }
 
+    private static int compareName(String a, String b) {
+        if (a == null && b == null)
+            return 0;
+        if (a == null)
+            return 1;
+        if (b == null)
+            return -1;
+        return a.compareToIgnoreCase(b);
+    }
+
     private void loadSubscriptions() {
         progressBar.setVisibility(View.VISIBLE);
         textViewError.setVisibility(View.GONE);
@@ -95,15 +105,21 @@ public class SubscriptionActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             subscriptionItems.clear();
                             subscriptionItems.addAll(result);
-                            // 日期排序: 由近到遠，無日期排最後
+                            // 日期排序: 由近到遠，無日期排最後；同日期按名稱排序
                             Collections.sort(subscriptionItems, (a, b) -> {
-                                if (a.nextDateMillis <= 0 && b.nextDateMillis <= 0)
-                                    return 0;
+                                if (a.nextDateMillis <= 0 && b.nextDateMillis <= 0) {
+                                    // 兩者都無日期，按名稱排
+                                    return compareName(a.name, b.name);
+                                }
                                 if (a.nextDateMillis <= 0)
                                     return 1;
                                 if (b.nextDateMillis <= 0)
                                     return -1;
-                                return Long.compare(a.nextDateMillis, b.nextDateMillis);
+                                int dateCompare = Long.compare(a.nextDateMillis, b.nextDateMillis);
+                                if (dateCompare != 0)
+                                    return dateCompare;
+                                // 同日期按名稱排序
+                                return compareName(a.name, b.name);
                             });
                             adapter.notifyDataSetChanged();
 

@@ -619,6 +619,11 @@ public class AppwriteHelper {
         } catch (DateTimeParseException ignored) {
         }
         try {
+            java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(value);
+            return odt.toInstant().toEpochMilli();
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
             LocalDate date = LocalDate.parse(value);
             return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         } catch (DateTimeParseException ignored) {
