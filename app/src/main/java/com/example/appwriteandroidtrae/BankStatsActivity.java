@@ -12,14 +12,17 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class BankStatsActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
     private ListView listView;
     private TextView textViewError;
+    private TextView textTotalDeposit;
     private BankAdapter adapter;
     private final List<AppwriteHelper.BankItem> bankItems = new ArrayList<>();
 
@@ -41,6 +44,7 @@ public class BankStatsActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         listView = findViewById(R.id.listViewBanks);
         textViewError = findViewById(R.id.textViewError);
+        textTotalDeposit = findViewById(R.id.textTotalDeposit);
 
         adapter = new BankAdapter(this, bankItems);
         listView.setAdapter(adapter);
@@ -67,6 +71,7 @@ public class BankStatsActivity extends AppCompatActivity {
                             bankItems.clear();
                             bankItems.addAll(result);
                             adapter.notifyDataSetChanged();
+                            updateTotalDeposit();
                         });
                     }
 
@@ -79,6 +84,16 @@ public class BankStatsActivity extends AppCompatActivity {
                         });
                     }
                 });
+    }
+
+    private void updateTotalDeposit() {
+        long total = 0;
+        for (AppwriteHelper.BankItem item : bankItems) {
+            total += item.deposit;
+        }
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.getDefault());
+        textTotalDeposit.setText("所有銀行存款總和: " + nf.format(total));
+        textTotalDeposit.setVisibility(View.VISIBLE);
     }
 
     private static class BankAdapter extends ArrayAdapter<AppwriteHelper.BankItem> {

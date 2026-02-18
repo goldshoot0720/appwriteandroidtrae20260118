@@ -33,6 +33,17 @@
         android:textColor="@android:color/holo_red_dark"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/textTotalDeposit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/purple_500"
+        android:background="#F5F5F5"
+        android:visibility="gone" />
+
     <ListView
         android:id="@+id/listViewBanks"
         android:layout_width="match_parent"
