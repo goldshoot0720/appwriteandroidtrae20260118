@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SubscriptionActivity extends AppCompatActivity {
 
-    private static final String CHANNEL_ID = "subscription_expiry_channel";
+    private static final String CHANNEL_ID = "subscription_expiry_channel_v2";
     private static final int REQUEST_POST_NOTIFICATIONS = 1001;
 
     private ProgressBar progressBar;
@@ -140,9 +140,10 @@ public class SubscriptionActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "訂閱到期提醒";
             String description = "顯示最近到期的訂閱通知";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.enableVibration(true);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(channel);

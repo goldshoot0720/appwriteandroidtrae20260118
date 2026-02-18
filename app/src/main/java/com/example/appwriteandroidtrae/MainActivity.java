@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String CHANNEL_ID = "subscription_expiry_channel";
+    private static final String CHANNEL_ID = "subscription_expiry_channel_v2";
     private static final int REQUEST_POST_NOTIFICATIONS = 1001;
 
     @Override
@@ -83,17 +83,19 @@ public class MainActivity extends AppCompatActivity {
 
     // Menu is no longer needed in MainActivity since we have big buttons,
     // but if you want to keep it as fallback or specific settings later, you can.
-    // For now, I'll remove it to avoid confusion as per user request for "Selection Menu" on main page.
+    // For now, I'll remove it to avoid confusion as per user request for "Selection
+    // Menu" on main page.
     // If the user meant "Menu" as in "Three-dot menu", I should keep it.
     // But "首頁顯示選單 訂閱管理 銀行統計" strongly suggests the page content itself is the menu.
-    
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "訂閱到期提醒";
             String description = "顯示最近到期的訂閱通知";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.enableVibration(true);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
@@ -103,13 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
                         this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        REQUEST_POST_NOTIFICATIONS
-                );
+                        new String[] { Manifest.permission.POST_NOTIFICATIONS },
+                        REQUEST_POST_NOTIFICATIONS);
             }
         }
     }
@@ -131,15 +132,13 @@ public class MainActivity extends AppCompatActivity {
 
         PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
                 SubscriptionCheckWorker.class,
-                24, TimeUnit.HOURS
-        )
+                24, TimeUnit.HOURS)
                 .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
                 .build();
 
         WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(
                 "subscription_check",
                 ExistingPeriodicWorkPolicy.KEEP,
-                request
-        );
+                request);
     }
 }

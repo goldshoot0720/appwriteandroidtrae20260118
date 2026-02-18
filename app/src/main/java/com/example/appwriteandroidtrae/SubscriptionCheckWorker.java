@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SubscriptionCheckWorker extends Worker {
 
-    private static final String CHANNEL_ID = "subscription_expiry_channel";
+    private static final String CHANNEL_ID = "subscription_expiry_channel_v2";
 
     public SubscriptionCheckWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -100,9 +100,10 @@ public class SubscriptionCheckWorker extends Worker {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "訂閱到期提醒";
             String description = "顯示最近到期的訂閱通知";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.enableVibration(true);
             NotificationManager manager = (NotificationManager) getApplicationContext()
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
