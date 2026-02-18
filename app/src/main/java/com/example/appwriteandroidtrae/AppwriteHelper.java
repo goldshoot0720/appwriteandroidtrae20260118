@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -369,10 +370,11 @@ public class AppwriteHelper {
                     .append("/collections/").append(collectionId)
                     .append("/documents?limit=").append(PAGE_LIMIT);
 
-            // 使用 cursorAfter 進行游標分頁（Appwrite 匿名存取不支援 offset）
+            // 使用 cursorAfter 進行游標分頁（Appwrite v1.8+ JSON 格式）
             if (lastDocId != null) {
-                pathBuilder.append("&queries%5B0%5D=cursorAfter(%22")
-                        .append(lastDocId).append("%22)");
+                String cursorQuery = "{\"method\":\"cursorAfter\",\"values\":[\"" + lastDocId + "\"]}";
+                pathBuilder.append("&queries%5B0%5D=")
+                        .append(URLEncoder.encode(cursorQuery, "UTF-8"));
             }
 
             HttpURLConnection connection = null;
